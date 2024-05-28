@@ -11,6 +11,7 @@ vector_db = Chroma_DB()
 UPLOAD_FOLDER = './data/sources'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1000 * 1000
 
 @app.before_request
 def check_initialize():
@@ -74,11 +75,11 @@ def ask_rag():
     if not vector_db.is_initialized:
         return jsonify({"error": "Please Wait, DB not initialized"}), 400
     try:
-        extra = request.json['extra_instruction']
-        q_type = request.json['question_type']
-        subject = request.json['subject']
-        diff = request.json['difficulty']
-        lang = request.json['language']
+        extra = request.form['extra_instruction']
+        q_type = request.form['question_type']
+        subject = request.form['subject']
+        diff = request.form['difficulty']
+        lang = request.form['language']
         query_collection= vector_db.langchain_chroma
         response = gpu_llm.chat_rag(extra, q_type, subject, diff, lang, query_collection)
         delete_file(file_path)
@@ -102,7 +103,7 @@ def ask_rag():
 #         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 #         file.save(file_path)
 #         try:
-#             vector_db.update_collection()
+#             vector_db.initialize()
 #             return jsonify({"file_path": file_path})
 #         except Exception as e:
 #             return jsonify({"error": str(e)}), 500
