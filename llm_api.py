@@ -11,6 +11,7 @@ vector_db = Chroma_DB()
 UPLOAD_FOLDER = './data/sources'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1000 * 1000
 
 @app.before_request
 def check_initialize():
@@ -107,7 +108,7 @@ def ask_rag():
 #         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 #         file.save(file_path)
 #         try:
-#             vector_db.update_collection()
+#             vector_db.initialize()
 #             return jsonify({"file_path": file_path})
 #         except Exception as e:
 #             return jsonify({"error": str(e)}), 500
