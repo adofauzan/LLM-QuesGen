@@ -74,13 +74,18 @@ def ask_rag():
     if not vector_db.is_initialized:
         return jsonify({"error": "Please Wait, DB not initialized"}), 400
     try:
-        extra = request.json['extra_instruction']
-        q_type = request.json['question_type']
-        subject = request.json['subject']
-        diff = request.json['difficulty']
-        lang = request.json['language']
+        extra = request.form['extra_instruction']
+        q_type = request.form['question_type']
+        subject = request.form['subject']
+        lang = request.form['language']
         query_collection= vector_db.langchain_chroma
-        response = gpu_llm.chat_rag(extra, q_type, subject, diff, lang, query_collection)
+        response = gpu_llm.chat_rag(
+            extra, 
+            q_type, 
+            subject, 
+            lang, 
+            query_collection
+        )
         delete_file(file_path)
         return jsonify({"response": response})
     except KeyError:

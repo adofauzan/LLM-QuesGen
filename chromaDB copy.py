@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import PyPDFLoader, PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
-from langchain_community.embeddings import GPT4AllEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 import chromadb
 
@@ -18,12 +18,14 @@ class Chroma_DB:
         try:
             self.client = chromadb.PersistentClient(path="./data/chroma_db")
             self.collection = self.client.get_or_create_collection("books")
-            model_name = "all-MiniLM-L6-v2.gguf2.f16.gguf"
-            gpt4all_kwargs = {'allow_download': 'True'}
-            self.embeddings = GPT4AllEmbeddings(
+            model_name = "./Flask/data/gte-large-en-v1.5"
+            model_kwargs = {'device': "cuda", "trust_remote_code": True}
+            encode_kwargs = {'normalize_embeddings': False}
+            self.embeddings = HuggingFaceEmbeddings(
                 model_name=model_name,
-                gpt4all_kwargs=gpt4all_kwargs
-                )
+                model_kwargs=model_kwargs,
+                encode_kwargs=encode_kwargs,
+            )
             self.langchain_chroma = Chroma(client=self.client, collection_name="books", embedding_function = self.embeddings)
             self.is_initialized = True
             print("vector_db is initalized")
@@ -59,7 +61,7 @@ class Chroma_DB:
         )
 
     def update_langchain_chroma(self):
-        self.langchain_chroma = Chroma(client=self.client, collection_name="books", embedding_functions = embeddings)
+        self.langchain_chroma = Chroma(client=self.client, collection_name="books", embedding_functions = self.embeddings)
 
     def update_collection(self):
         docs = self.load_documents()
